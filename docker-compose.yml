@@ -1,0 +1,51 @@
+version: '3.3'
+services:
+  reverse-proxy:
+    image: traefik:v2.4
+    container_name: reverse-proxy
+    command: 
+      - "--api.insecure=true" 
+      - "--providers.docker"
+      - "--entrypoints.web.address=0.0.0.0:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=pred-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  
+    networks:
+      - pred-network
+  model-service:
+    image: x86_64/cassava-model-service:0.8.1
+    container_name: model-service
+    environment:
+      MODEL_NAME: saved_model
+    networks:
+      - pred-network
+  api-service:
+    image: x86_64/cassava-prediction-service:0.8.1
+    container_name: api-service
+    environment:
+      SERVING_SERVICE: model-service
+    expose:
+      - 8000
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api-service.rule=Host(`api.service.localhost`)
+    networks:
+      - pred-network
+  ui-service:
+    image: x86_64/cassava-prediction-ui:0.8.1
+    container_name: ui-service
+    expose:
+      - 80
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ui-service.rule=Host(`ui.service.localhost`) || Host(`192.168.12.34`) || Host(`localhost`)
+      - traefik.http.routers.ui-service.entrypoints=web
+    networks:
+      - pred-network
+networks:
+  pred-network:
