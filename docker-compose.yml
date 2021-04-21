@@ -36,7 +36,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.api-service.rule=Host(`api.service.localhost`) || Host(`192.168.12.34`)
-      - traefik.http.routers.ui-service.entrypoints=web2
+      - traefik.http.routers.api-service.entrypoints=web2
     networks:
       - pred-network
   ui-service:
