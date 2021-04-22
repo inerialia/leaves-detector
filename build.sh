@@ -1,3 +1,4 @@
+rm -rf leaves-detector/
 git clone https://github.com/inerialia/leaves-detector
 chown -R vagrant:vagrant leaves-detector
 cd leaves-detector/api.service/
